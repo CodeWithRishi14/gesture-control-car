@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Gesture Car</title>
+
+<style>
+body{
+    font-family:Arial;
+    text-align:center;
+    margin-top:40px;
+}
+h1{
+    font-size:32px;
+}
+#status{
+    font-size:24px;
+    margin-top:20px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Gesture Car</h1>
+
+<h2>Tilt Phone to Drive</h2>
+
+<div id="status">
+Waiting...
+</div>
+
+<script>
+
+let lastSend = 0;
+
+function sendGesture(x,y){
+
+    const now = Date.now();
+
+    if(now - lastSend < 150)
+        return;
+
+    lastSend = now;
+
+    fetch(`http://192.168.4.1/gesture?x=${x}&y=${y}`)
+    .catch(err => console.log(err));
+}
+
+window.addEventListener("deviceorientation", function(event){
+
+    let x = event.gamma || 0;
+    let y = event.beta || 0;
+
+    let action = "STOP";
+
+    if(y < -15)
+        action = "FORWARD";
+
+    else if(y > 15)
+        action = "BACKWARD";
+
+    else if(x < -15)
+        action = "LEFT";
+
+    else if(x > 15)
+        action = "RIGHT";
+
+    document.getElementById("status").innerHTML =
+    `X=${x.toFixed(0)} Y=${y.toFixed(0)}<br><b>${action}</b>`;
+
+    sendGesture(x,y);
+
+});
+
+</script>
+
+</body>
+</html>
